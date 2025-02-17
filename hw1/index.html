@@ -28,19 +28,19 @@
 	<body>
 		<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 1 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+		<div style="text-align: center;">Benjamin Bliss</div>
 
 		<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-z_hello_world/hw1/index.html">https://cal-cs184-student.github.io/hw-webpages-z_hello_world/hw1/index.html</a>
 		
 		<br>
 
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to GitHub repository: <a href="https://github.com/cal-cs184-student/hw-webpages-z_hello_world">https://github.com/cal-cs184-student/hw-webpages-z_hello_world</a>
 
 		<figure>
-			<img src="lion.jpg" alt="Lion" style="width:50%"/>
-			<figcaption>You can add images with captions!</figcaption>
+			<img src="cover.png" alt="Map" style="width:50%"/>
+			<!-- <figcaption>You can add images with captions!</figcaption> -->
 		</figure>
 
 		<!--
@@ -48,9 +48,30 @@
 		-->
 
 		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+		In this homework, I wrote the core functions used in rasterization. It is able to draw triangles and interpolate inside the triangles.
 
 		<h2>Task 1: Drawing Single-Color Triangles</h2>
+		<ul>
+			<li>
+				To rasterize a triangle:
+				<ul>
+					<li>The bounding box for the triangle is found by taking the min and max of every point.</li>
+					<li>Each pixel within the bounding box is sampled with the three line equations for the triangle. If the point is inside all three lines or outside all three lines, the pixel is filled in the framebuffer.</li>
+				</ul>
+			</li>
+			<li>
+				In order to avoid extra calculation, the only pixels iterated upon are the pixels in the bounding box. This is done by changing the for loops to start at the bounding box start and end at the bounding box end.
+			</li>
+			<li>
+				The loop order was also changed to iterate <code>y</code> then <code>x</code>. Assuming the framebuffer is layed out in row major order, this should improve the cache hit rate.
+			</li>
+		</ul>
+		<figure>
+			<img src="task1.png" alt="Triangles" style="width:50%"/>
+			<figcaption><code>basic/test4.svg</code></figcaption>
+		</figure>
+
+		<!--
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
@@ -78,35 +99,167 @@
 			  </tr>
 			</table>
 		</div>
+		-->
 		
 		<h2>Task 2: Antialiasing by Supersampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Task 3: Transforms</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Task 4: Barycentric coordinates</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Task 5: "Pixel sampling" for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Additional Notes (please remove)</h2>
 		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( \int{a^2} + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
+			<li>
+				In order to do supersampling, the size of the framebuffer was increased by the supersampling factor.
+				<br>
+				For traingles, the triangle coordinates were multiplied by <code>sqrt(sample_rate)</code>. Then the triangles were drawn as if the screen was the higher resolution.
+				<br>
+				Then <code>resolve_to_framebuffer</code> was modified to take the average for each supersample tile and use that for the final pixel color.
+				<br>
+				Supersampling is useful for reducing aliasing. In this case, it is used to reduce stair-stepping of hard edges on a pixel grid.
+			</li>
+			<li>
+				The difference between sample rates can be seen below. With no supersampling, gaps can be observed. Then, when the sample rate is increased, the triangle hits some of the subsamples and causes a value between white and red. This creates a smooth appearance from afar.
 			</li>
 		</ul>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<td style="text-align: center;">
+						<img src="task2-1x.png" width="100%"/>
+						<figcaption><code>1x</code></figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="task2-4x.png" width="100%"/>
+						<figcaption><code>4x</code></figcaption>
+					</td>
+				</tr>
+				<tr>
+					<td style="text-align: center;">
+						<img src="task2-9x.png" width="100%"/>
+						<figcaption><code>9x</code></figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="task2-16x.png" width="100%"/>
+						<figcaption><code>16x</code></figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<h2>Task 3: Transforms</h2>
+		The original robot only had 0 or 45 degree angles. This would not test whether I did the correct rotation matrix. I changed the robot head to have a different tilt, and added eyes to check draw order.
+		I also rotated and translated the right arm to have a more interesting pose.
+
+		<figure>
+			<img src="task3.png" alt="Robot" style="width:50%"/>
+			<figcaption>Robot with eyes waving.</figcaption>
+		</figure>
+
+		<h2>Task 4: Barycentric coordinates</h2>
+		Barycentric coordinates are a good way to interpolate between the points on a triangle. The way they interpolate fits expectation. If you interpolate the position of the triangle's points, you will get the position of each point as it lies on the triangle.
+		<br>
+		When color data is interpolated, you get a smooth blending of the colors (as seen below).
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<td style="text-align: center;">
+					<img src="task4.png" alt="Triangle" style="width:50%"/>
+					<figcaption><code>Triangle interpolating between red blue and green</code></figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="task4-test7.png" alt="Triangle" style="width:100%"/>
+					<figcaption><code>basic/test7.svg</code></figcaption>
+				</td>
+			</table>
+		</div>
+
+		<h2>Task 5: "Pixel sampling" for texture mapping</h2>
+		<ul>
+			<li>
+				Pixel sampling is the method used for fetching texels that are mapped onto a rendered surface.
+				<br>
+				The two studied here are nearest and bilinear.
+				<br>
+				Nearest just gets the nearest texel to the UV coordinate. This has a "pixelated" look.
+				<br>
+				Bilinear gets the nearest 4 texels and linearly interpolates between them depending on UV coordinate. This has a smoother look.
+			</li>
+			<li>
+				In the below pictures, the interpolation methods are compared at different levels of supersampling.
+				<br>
+				There tends to be a large difference between sampling methods when the frequency of the image data is higher than the sampling will capture. This is because bilinear interpolation will capture more pixels, and is less likely to skip some. Pre-filtering the texture is better for fixing this issue.
+				<br>
+				(Not as visible here) There also tends to be a large difference when the resolution of the texture is low. Then bilinear will have the effect of smoothing out hard edges between texels.
+			</li>
+		</ul>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<td style="text-align: center;">
+						<img src="task5-nearest1x.png" width="100%"/>
+						<figcaption><code>1x</code> nearest</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="task5-nearest16x.png" width="100%"/>
+						<figcaption><code>16x</code> nearest</figcaption>
+					</td>
+				</tr>
+				<tr>
+					<td style="text-align: center;">
+						<img src="task5-bilinear1x.png" width="100%"/>
+						<figcaption><code>1x</code> bilinear</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="task5-bilinear16x.png" width="100%"/>
+						<figcaption><code>16x</code> bilinear</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
+		<ul>
+			<li>
+				Level sampling is pre-filtering the texture to reduce aliasing when it is down-sampled. The image is usually stored in successively lower resolutions which saves memory and has the effect of low-pass filtering the image.
+				<br>
+				The pre-provided code generated the mips ahead of time, but my code used them based on the largest magnatude of the change in <code>u</code> or <code>v</code> across one pixel.
+				If the next pixel in a direction moved a lot in the <code>u</code> or <code>v</code> coordinate, then the texture lookup is likely to skip pixels, and a lower level is sampled.
+			</li>
+			<li>
+				Increasing the number of samples per pixel is very expensive, but takes the least memory, and tends to have accurate results. It becomes very expensive, however, when you need to down-sample a texture by a large factor.
+				<br>
+				Changing the sampling to bilinear instead of nearest takes 4 times as many texture lookups as it otherwise would. It is better for reducing jaggies than reducing sample aliasing.
+				<br>
+				Using level sampling takes more memory to store the levels. Using linear interpolation to interpolate between levels also doubles the number of texture lookups. While this solves the issue of aliasing, it tends to blur the final texture.
+				This is partially because the texture may only need to be blurred in one axis.
+			</li>
+			<li>
+				In the below images, you can see that the level sampling clearly blurs the numbers towards the edges. It makes the numbers closest to the edges un-readable. However, it does make the whole image look much smoother.
+			</li>
+		</ul>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<td style="text-align: center;">
+						<img src="task6-zero-nearest.png" width="100%"/>
+						<figcaption><code>L_ZERO</code> and <code>P_NEAREST</code> </figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="task6-zero-linear.png" width="100%"/>
+						<figcaption><code>L_ZERO</code> and <code>P_LINEAR</code> </figcaption>
+					</td>
+				</tr>
+				<tr>
+					<td style="text-align: center;">
+						<img src="task6-nearest-nearest.png" width="100%"/>
+						<figcaption><code>L_NEAREST</code> and <code>P_NEAREST</code> </figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="task6-nearest-linear.png" width="100%"/>
+						<figcaption><code>L_NEAREST</code> and <code>P_LINEAR</code> </figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+
 		</div>
 	</body>
 </html>
