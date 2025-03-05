@@ -48,7 +48,7 @@
 		-->
 
 		<h2>Overview</h2>
-		TODO!
+		In this homework, I made a bezier curve evaluator, and operated on half edge structured meshes. This made calculating things like vertex normals very easy. I also implemented loop subdivision on these meshes, and studied its effects.
 
 		<h2>Section I: Bezier Curves and Surfaces</h2>
 
@@ -147,27 +147,183 @@
 		</div>
 
 		<h3>Part 4: Edge flip</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h3>Part 5: Edge split</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h3>Part 6: Loop subdivision for mesh upsampling</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>(Optional) Section III: Potential Extra Credit - Art Competition: Model something Creative</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Additional Notes (please remove)</h2>
 		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
+			<li>
+				In order to implement the edge split, I first got all of the relavent pointers to the original structures. Otherwise it would be easy to accidentally reference something that changed.<br>
+				Then I just set each field according to a counterclockwise edge rotation.
+			</li>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="edge_flip_before.png" width="100%"/>
+							<figcaption>Original teapot mesh</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="edge_flip_after.png" width="100%"/>
+							<figcaption>Modified with edge flips</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<li>
+				There was a corner case I found for the edge flip operation that took some time to figure out. When the two vertices that the new edge will span already have an edge spanning them, the geometry will not make sense any more.<br>
+				In order to protect against this, I just check the two cases where this will occur and stop the operation.
+				<figure>
+					<img src="edge_flip_issue.png" alt="edge flip corner case" style="width:50%"/>
+					<figcaption>To flip the pink highlighted edge</figcaption>
+				</figure>
 			</li>
 		</ul>
+
+		<h3>Part 5: Edge split</h3>
+		<ul>
+			<li>
+				To implement the operation, I created 1 new vertex, 3 new edges, 3 new faces, and 6 new halfedges. Then I got pointers to the surrounding vertices. Then I went through and re-assigned all the relavent members of the structures to follow what the new mesh should be.<br>
+				When debugging, I found it useful to print (something at least related to) the addresses of the objects. It wouldn't let me print the iterators directly, so I was able to do something of the form <code>std::cout << &*it << std::endl;</code>.
+			</li>
+			<li>
+				I did not find the debugging journy to be particularly eventful. It was just finding small mistakes in the assignment of the many different members of structures.
+			</li>
+		</ul>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<td style="text-align: center;">
+						<img src="edge_split_before.png" width="100%"/>
+						<figcaption>Original teapot mesh</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="edge_split.png" width="100%"/>
+						<figcaption>Modified with edge splits</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="edge_split_and_flip.png" width="100%"/>
+						<figcaption>Modified with edge splits and flips</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<h3>Part 6: Loop subdivision for mesh upsampling</h3>
+		<ul>
+			<li>
+				To implement the loop subdivision, I started by getting the simple subdivision working (just the mesh / no smoothing).
+				This turned out to be more difficult that I expected because of the way the iterators are structured. If I iterated up to the end element when doing the split operation, the program would not terminate.
+				To fix this, stored <code>std::prev(end)</code>, then I iterated to it. After the iteration finished, I split the object I stored. This way it did not miss the last edge and did not loop forever because the new objects were being inserted before <code>end</code>.<br>
+				Then it was pretty easy to add smoothing. I just followed the loop subdivision formula for the two types of vertices. I used the pre-existing structure in <code>Vertex</code> and <code>Edge</code> for storing new positions.<br>
+				The final algorithm calculates the new vertex positions for each vertex and each edge, then splits every edge, then flips all edges between new and old vertices, then updates the positions of vertices.
+			</li>
+			<li>
+				When I was debugging I made the assumption that the underlying data was stored <code>std::vector</code>s. That made figuring out why it was iterating forever more difficult because I thought the iterators would be indexing into the array.<br>
+				Once I figured out it was using linked lists, it took a bit to figure out that it was placing the new elements right before <code>list::end()</code>. When I was iterating to <code>end</code>, it would never reach it because it was adding new objects between the current and the end.
+			</li>
+			<li>
+				I noticed that the icosahedron had sharp edges that smoothed out pretty well. However, the sharp corners are still somewhat visible on the final subdivided mesh.<br>
+				I also found that adding edge splits before subdividing only made things worse. It just seemed to add those critical points and made the whole thing more lumpy.<br>
+				The teapot, however, does pretty well under this subdivion. It is hard to see, but the very top handle has some appearance of wrinkles.
+			</li>
+			<li>
+				I believe the cube becomes asymetric because the vertex degree is not consistent. The cube looks symetric without the wireframe view, but each square face is split arbitrarily into two triangles.<br>
+				To fix this, I split each of the edges on each face such that the cube had an X shape on each face (see below image). This made the topology symetric. The final subdivided cube looks much more smooth, it is still not a perfect sphere.
+			</li>
+		</ul>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<td style="text-align: center;">
+						<img src="ico_l0.png" width="100%"/>
+						<figcaption>Original</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="ico_l1.png" width="100%"/>
+						<figcaption>1 subdivision</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="ico_l2.png" width="100%"/>
+						<figcaption>2 subdivisions</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="ico_l7.png" width="100%"/>
+						<figcaption>7 subdivisions</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="ico_edge_split.png" width="100%"/>
+						<figcaption>Manual edge splits, then subdivision</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<td style="text-align: center;">
+						<img src="teapot_l0.png" width="100%"/>
+						<figcaption>Original</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="teapot_l1.png" width="100%"/>
+						<figcaption>1 subdivision</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="teapot_l2.png" width="100%"/>
+						<figcaption>2 subdivisions</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="teapot_l5.png" width="100%"/>
+						<figcaption>5 subdivisions</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<td style="text-align: center;">
+						<img src="cube_l0.png" width="100%"/>
+						<figcaption>Original</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="cube_l1.png" width="100%"/>
+						<figcaption>1 subdivision</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="cube_l2.png" width="100%"/>
+						<figcaption>2 subdivisions</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="cube_l7.png" width="100%"/>
+						<figcaption>7 subdivisions</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<td style="text-align: center;">
+						<img src="cube_preprocess_l0.png" width="100%"/>
+						<figcaption>Edge splits for symmetry</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="cube_preprocess_l1.png" width="100%"/>
+						<figcaption>1 subdivision</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="cube_preprocess_l2.png" width="100%"/>
+						<figcaption>2 subdivisions</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="cube_preprocess_l7.png" width="100%"/>
+						<figcaption>7 subdivisions</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<h2>(Optional) Section III: Potential Extra Credit - Art Competition: Model something Creative</h2>
+		N/A
+
 		</div>
 	</body>
 </html>
