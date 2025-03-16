@@ -3,9 +3,9 @@
 		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 		<style>
-			h1 {
-				text-align: center;
-			}
+h1 {
+	text-align: center;
+}
 
 			.container {
 				margin: 0 auto;
@@ -27,80 +27,272 @@
 	</head>
 	<body>
 		<div class="container">
-		<h1>CS184/284A Spring 2025 Homework 3 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+			<h1>CS184/284A Spring 2025 Homework 3 Write-Up</h1>
+			<div style="text-align: center;">Names: </div>
 
-		<br>
+			<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-		
-		<figure>
-			<img src="cornell.png" alt="Cornell Boxes with Bunnies" style="width:70%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
+			Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-z_hello_world/hw3/index.html">https://cal-cs184-student.github.io/hw-webpages-z_hello_world/hw2/index.html</a>
+			<br>
+			Link to GitHub repository: <a href="https://github.com/cal-cs184-student/hw-webpages-z_hello_world">https://github.com/cal-cs184-student/hw-webpages-z_hello_world</a>
 
-		<!--
-		We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
-		-->
+			<figure>
+				<img src="cover.png" alt="" style="width:20%"/>
+			</figure>
 
-		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+			<!--
+				We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
+			-->
 
-		<h2>Part 1: Ray Generation and Scene Intersection</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			<h2>Overview</h2>
+			TODO!<br>
+			Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
-		<div style="display: flex; flex-direction: column; align-items: center;">
-			<table style="width: 100%; text-align: center; border-collapse: collapse;">
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			</table>
-		</div>
-		
-		<h2>Part 2: Bounding Volume Hierarchy</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			<h2>Part 1: Ray Generation and Scene Intersection</h2>
+			<ul>
+				<li>
+					The ray generation starts with a position on the screen (\(p\in[0,1]\times[0,1]\)) and returns the corresponding camera ray in world space. It does this by evaluating the following formula:
+					\[\vec{o_r} = \text{camera position}\]
+					\[\vec{d_r} = \text{normalize}\left(\begin{bmatrix}
+					(2x_p-1)\tan\left(\frac{h_{fov}}{2}\right)\\
+					(2y_p-1)\tan\left(\frac{v_{fov}}{2}\right)\\
+					-1\end{bmatrix}
+					\right)\]
+					The ray points in the negative \(Z\) direction to follow the right hand rule when writing the axis \((x,y,z)\).<br>
+					The tangent function gives the ratio of depth to perpendicular distance (at an angle). This is perfect when trying to find the ray's horizontal and vertical directions at depth \(1\).
+				</li>
+				<li>
+					I implemented the Möller Trumbore algorithm. The algoritm finds the intersection point in terms of barycentric coordinates and the depth.
+					This is nice because it finds the barycentric coordinates directly rather than having to compute them after finding the intersection in world space.
+					<br>
+					It does this by solving:
+					\[t\cdot\vec{d_r} + \vec{o_r} = u\cdot\vec{P_1} + v\cdot\vec{P_2} + w\cdot\vec{P_3}\]
+					where \(u, v, w\) are the barycentric coordinates.
+					<br>
+					Substituting \(u\) with \(1-v-w\) yields a system of 3 equations with 3 unknowns. The algorithm uses Cramer's rule along with some simplifications to solve the system.
+					<br>
+					Optimizations:<br>
+					<ul>
+						<li>
+							I also decided to avoid dividing by the determinant until necessary. This meant checking if \(u+v>\text{det}\) rather than \(u+v>1\). (It also checks the sign of the determinant for the faster check)
+							<br>
+							The benifit would be that some early exits could occur and never have to divide.
+						</li>
+						<li>
+							Early exits:<br>
+							If the determinant is zero, the ray is co-planar with the triangle.<br>
+							If \(v\) is out of range.<br>
+							If \(w\) or \(v+w\) are out of range.<br>
+							If \(t\) is out of range.
+						</li>
+					</ul>
+				</li>
+			</ul>
 
-		<h2>Part 3: Direct Illumination</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part1/spheres.png" width="400px"/>
+							<figcaption><code>sky/CBspheres_lambertian.dae</code></figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part1/gems.png" width="400px"/>
+							<figcaption><code>sky/CBgems.dae</code></figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part1/coil.png" width="400px"/>
+							<figcaption><code>sky/CBcoil.dae</code></figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part1/dragon.png" width="400px"/>
+							<figcaption><code>sky/CBdragon.dae</code></figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
 
-		<h2>Part 4: Global Illumination</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			<h2>Part 2: Bounding Volume Hierarchy</h2>
+			<ul>
+				<li>
+					The splitting algorithm starts by iterating through the three base axes.
+					<br>
+					For each of the axis it finds the position of the median bounding box centroid of the primitives. Then it finds the surface area of each child volume and sums them.
+					<br>
+					The axis split that yields the best surface area is kept.
+					<br>
+					Using the median element is nice because it maintains a balanced tree. It, however, cannot account for some situations that could greatly reduce the surface area. (Like if the geometry is in two tightly packed differently sized regions)
+				</li>
+				<li>
+					Traversal Optimization:<br>
+					When traversing the acceleration structure, I tried to minimize unnecessary work. To do this, the algoritm always traverses the closer child node first.
+					Then it does not traverse the other child node if the ray's hit point is closer than the external hit point of the child node.
+				</li>
+				<li>
+					Performance difference:
+					<ul>
+						<li>
+							<code>meshedit/cow.dae</code> at 1spp, res=380x560:<br>
+							Render time: 3.0241s → 0.0173s (0.57%)<br>
+							BVH generation time: 0.0060s<br>
+						</li>
+						<li>
+							<code>meshedit/maxplanck.dae</code> at 1spp, res=380x560:<br>
+							Render time: 25.3723s → 0.0231s (0.091%)<br>
+							BVH generation time: 0.0760s<br>
+						</li>
+						<li>
+							<code>sky/CBlucy.dae</code> at 1spp, res=380x560:<br>
+							Render time: 84.5542s → 0.0157s (0.018%)<br>
+							BVH generation time: 0.2362s<br>
+						</li>
+					</ul>
+					This is quite a large speedup. Even when considering the generation time of the BVH. If the BVH had to be re-constructed every render, it would still be very worth while.
+					<br>
+					Going from least to most triangles, the performance improvement clearly increases. The cow took 0.57% of the original time while the angel took 0.018% of the time.
+					This makes sence because the naive method increases linearly while the BVH traversal increases inverse exponentially.
+				</li>
+			</ul>
 
-		<h2>Part 5: Adaptive Sampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part2/lucy.png" width="400px"/>
+							<figcaption><code>sky/CBlucy.dae</code> (64 spp)</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part2/wall-e.png" width="400px"/>
+							<figcaption><code>sky/wall-e.dae</code> (64 spp)</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part2/maxplanck.png" width="400px"/>
+							<figcaption><code>meshedit/maxplanck.dae</code> (64 spp)</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part2/bvh.png" width="400px"/>
+							<figcaption>BVH visualization for <code>sky/wall-e.dae</code></figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
 
-		<h2>(Optional) Part 6: Extra Credit Opportunities</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-		
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
+			<h2>Part 3: Direct Illumination</h2>
+			<ul>
+				<li>
+					Both of the direct lighting functions start by getting relevant information about the intersection. (hit point, incoming direction, space conversion matrices).
+					<br>
+					Then they accumulate samples.
+					<ul>
+						<li>
+							The uniform sampler samples by the number of lights times the number of samples per light.
+							<br>
+							For each, it gets a random direction from the surface. It converts it to world space and emits a ray in that direction.
+							<br>
+							If the ray hits something, it adds the bsdf times the emission of the object it hit and accumulates the result.
+							<br>
+							Then it divides the final accumulation by the number of samples and appropriate constant(s) (pdf=\(\frac{1}{2}\)).
+						</li>
+						<li>
+							The importance sampler iterates through the lights. Point lights only get sampled once, while area lights get sampled according to the command line argument.
+							<br>
+							Then it accumulates (for each sample that hit) the bsdf times the radiance over the pdf.
+							<br>
+							The accumulation for each light is divided by the number of samples spent on that light, then added to a larger accumulator.
+							<br>
+							Then the final accumulation of all lights is divided by appropriate constant(s) (\(\pi\)).
+						</li>
+					</ul>
+				</li>
+				<li>
+					Optimization:<br>
+					To save some (very small) amount of work, I delayed dividing by the probability density funciton until the end (when it was constant).<br>
+					I'm not sure if the compiler would have optimized this on its own because it has slightly different behavior (due to finite precision).
+				</li>
+				<li>
+					The importance sampling improves results greatly. The uniformly sampled images are extremely noisy evewhere while the importance sampled images are primarily just noisy in partially shadowed areas.
+					<br>
+					This follows intuitive expectation because the chance that a uniform sample hits a light is low, but when it does hit, the effect is high.
+				</li>
+				<li>
+					It appears that the effect of more samples (when importance sampling) diminishes. The difference between 1 sample and 4 samples appears larger than the difference between 16 samples and 64 samples.
+				</li>
+			</ul>
+
+			<p>Comparison of uniform hemisphere sampling (left) and importance sampling (right) at 32 light samples:</p>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part3/spheres_unif.png" width="400px"/>
+							<figcaption><code>sky/CBspheres_lambertian.dae</code> uniform</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part3/spheres_imp.png" width="400px"/>
+							<figcaption><code>sky/CBspheres_lambertian.dae</code> importance</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part3/bunny_unif.png" width="400px"/>
+							<figcaption><code>sky/CBbunny.dae</code> uniform</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part3/bunny_imp.png" width="400px"/>
+							<figcaption><code>sky/CBbunny.dae</code> importance</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<p>Importance sampling at different light sample rates:</p>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part3/spheres_imp_1x.png" width="400px"/>
+							<figcaption><code>sky/CBspheres_lambertian.dae</code> importance 1 light sample</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part3/spheres_imp_4x.png" width="400px"/>
+							<figcaption><code>sky/CBspheres_lambertian.dae</code> importance 4 light samples</figcaption>
+						</td>
+					<tr>
+					</tr>
+						<td style="text-align: center;">
+							<img src="images/part3/spheres_imp_16x.png" width="400px"/>
+							<figcaption><code>sky/CBspheres_lambertian.dae</code> importance 16 light samples</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part3/spheres_imp_64x.png" width="400px"/>
+							<figcaption><code>sky/CBspheres_lambertian.dae</code> importance 64 light samples</figcaption>
+						</td>
+				</table>
+			</div>
+
+			<h2>Part 4: Global Illumination</h2>
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+			<h2>Part 5: Adaptive Sampling</h2>
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+			<h2>(Optional) Part 6: Extra Credit Opportunities</h2>
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+			<h2>Additional Notes (please remove)</h2>
+			<ul>
+				<li>You can also add code if you'd like as so: <code>code code code</code></li>
+				<li>If you'd like to add math equations, 
+					<ul>
+						<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
+						<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
+					</ul>
+				</li>
+			</ul>
 		</div>
 	</body>
 </html>
