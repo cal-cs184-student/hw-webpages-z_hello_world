@@ -529,8 +529,133 @@ h1 {
 			</div>
 
 			<h2>(Optional) Part 6: Extra Credit Opportunities</h2>
+			<h3>GPU Compute</h3>
+			<h4>Restructuring:</h4>
 
+			In order to implement this, I started by restructuring some code to allow for picking the GPU or CPU to do rendering.<br>
+			I made a new class, <code>GPUPathTracer</code>, which renders one tile at a time using the GPU.<br>
+			I made another new class, <code>GPU_BVHAccel</code>, which is a version of the BVH that it optimized for sending to and using on the GPU.<br>
+			Because (atleast the last I heard) OpenGL does not support multithreading, I completely disable any thread spawning when GPU compute is selected.
 
+			<h4>Ray Generation:</h4>
+
+			To compute rays from the camera, I opted to use a matrix. This was because the entire view transformation could be done with two mutliplications using this matrix. (and 6 divisions, 3 subtractions, and a vector normalization to get the final ray).
+			<br>
+			The goal is for ray perspective generation and the camera transformation to be done simultaneously.
+			<br>
+			The final matrix looked like this (should look similar to the inverse of the standard perspective matrix):
+			\[
+			M=\begin{bmatrix}
+			\frac{2}{\text{width}}\cdot\tan\left(\frac{f_h}{2}\right) && 0 && 0 && -\tan\left(\frac{f_h}{2}\right)\\
+			0 && \frac{2}{\text{height}}\cdot\tan\left(\frac{f_v}{2}\right) && 0 && -\tan\left(\frac{f_v}{2}\right)\\
+			0 && 0 && 0 && -1\\
+			0 && 0 && -\frac{\text{far}-\text{near}}{\text{far}\cdot\text{near}} && \frac{\text{far}}{\text{far}\cdot\text{near}}
+			\end{bmatrix}
+			\]
+			Taking the vectors,
+			\[
+			\alpha=\begin{bmatrix}
+			x\\y\\0\\1
+			\end{bmatrix}
+			,
+			\beta=\begin{bmatrix}
+			x\\y\\1\\1
+			\end{bmatrix}
+			\]
+			and computing,
+			\[
+			a=\frac{(M\alpha)_{xyz}}{(M\alpha)_w}, b=\frac{(M\beta)_{xyz}}{(M\beta)_w}
+			\]
+			yields the ray origin and direction,
+			\[
+			r_o = a\\
+			r_d = \text{normalize}(b-a)
+			\]
+			What this is doing is finding coordinates on the near and far planes. The origin is set to the coordinate on the near plane, and the direction is the difference between the point on the near and far planes.
+			<br>
+			Consequently, the ray starts at the near plane rather than the pinhole camera's origin. This means that the ray's minimum \(t\) should be set to zero for the camera ray.
+			<br>
+			The benifit is that this matrix can be combined with the camera view matrix, and the latter computation can be done afterwards. (leaving just one 4x4 matrix being sent to the GPU program)
+			<br>
+			This also takes the pixel location in directly (rather than having to scale to \([0,1]\)coordinates first).
+			<br>
+			Testing:
+			<br>
+			<p>Testing the ray origin:</p>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/gpu/initial/origin_x.png" width="370px"/>
+							<figcaption>The ray origin for each pixel after translating the camera to the right.</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/gpu/initial/origin_y.png" width="370px"/>
+							<figcaption>The ray origin for each pixel after translating the camera up.</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/gpu/initial/origin_z.png" width="370px"/>
+							<figcaption>The ray origin for each pixel after translating the camera back.</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<p>Testing the ray direction:</p>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/gpu/initial/ray_dir_test.png" width="370px"/>
+							<figcaption>The direction of the ray for each pixel after rotating the camera slightly up and to the right.</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+			Actual triangle intersections will be much more conclusive as to whether this is working propertly or not. If the scene aligns perfectly, then it is likely correct.
+
+			<h4>Triangle Intersection:</h4>
+
+			I used an OpenGL storage buffer to send the data for each triangle.<br>
+			I translated the earlier implementation of the Möller Trumbore algorithm in GLSL.<br>
+			<br>
+			A compute shader does the actual computation using a for loop to go through each triangle.
+
+			<p>Testing the ray generation and triangle intersection:</p>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/gpu/initial/normal_shading.png" width="370px"/>
+							<figcaption><code>sky/CBempty.dae</code> with raw absolute value normal shading.</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/gpu/initial/bunny_normal.png" width="370px"/>
+							<figcaption><code>sky/CBbunny.dae</code> with raw absolute value normal shading.</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+			The bunny only took 8.3613 seconds with no acceleration structure, so despite having to check a huge number of triangle intersections, it is quite fast.
+			<br>
+			Also, these results show that the ray generation from the previous part is working. The position of the faces do not change at all when rendering.
+
+			<p>Testing the near clipping plane with the ray generation:</p>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/gpu/initial/near_clipping.png" width="370px"/>
+							<figcaption><code>sky/CBempty.dae</code> very close to camera</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			The clipping effect in this image aligned with the clipping done by the rasterized preview, so it is likely correct.
+
+			<h4>Acceleration Structure Construction, Storage, and Traversal:</h4>
+
+			<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 		</div>
 	</body>
 </html>
