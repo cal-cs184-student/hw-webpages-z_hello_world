@@ -532,10 +532,10 @@ h1 {
 			<h3>GPU Compute</h3>
 			<h4>Restructuring:</h4>
 
-			In order to implement this, I started by restructuring some code to allow for picking the GPU or CPU to do rendering.<br>
-			I made a new class, <code>GPUPathTracer</code>, which renders one tile at a time using the GPU.<br>
+			In order to implement this, I started by restructuring some code to allow for selecting the GPU or CPU to do rendering with a command line argument.<br>
+			I made a new class, <code>GPUPathTracer</code>, which renders the entire image using the GPU.<br>
 			I made another new class, <code>GPU_BVHAccel</code>, which is a version of the BVH that it optimized for sending to and using on the GPU.<br>
-			Because (atleast the last I heard) OpenGL does not support multithreading, I completely disable any thread spawning when GPU compute is selected.
+			Because (at least the last I heard) OpenGL does not support multithreading, I completely disable any thread spawning when GPU compute is selected.
 
 			<h4>Ray Generation:</h4>
 
@@ -577,7 +577,7 @@ h1 {
 			<br>
 			The benifit is that this matrix can be combined with the camera view matrix, and the latter computation can be done afterwards. (leaving just one 4x4 matrix being sent to the GPU program)
 			<br>
-			This also takes the pixel location in directly (rather than having to scale to \([0,1]\)coordinates first).
+			This also handles the pixel location directly (rather than having to scale to \([0,1]\)coordinates first).
 			<br>
 			Testing:
 			<br>
@@ -635,7 +635,7 @@ h1 {
 					</tr>
 				</table>
 			</div>
-			The bunny only took 8.3613 seconds with no acceleration structure, so despite having to check a huge number of triangle intersections, it is quite fast.
+			The bunny only took 8.3613 seconds with no acceleration structure, so despite having to check a huge number of triangle intersections, it is relatively fast.
 			<br>
 			Also, these results show that the ray generation from the previous part is working. The position of the faces do not change at all when rendering.
 
@@ -655,7 +655,70 @@ h1 {
 
 			<h4>Acceleration Structure Construction, Storage, and Traversal:</h4>
 
-			<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+			The structure of the BVH I implemented in GPU memory is the following:<br>
+			There is an array of triangle objects which each store 3 points and 3 normals (materials will be added to this later).<br>
+			Then there is an array of nodes which store a bounding box some additional information.<br>
+			Each node has four integers, two of which store the start and end indices (to be used like iterators) into the triangle array. If it is not a leaf node, they are both zero.<br>
+			The other two are used for traversal (described later).
+			I made it such that the root node is the first node in the array for simplicity.<br>
+
+
+			<br>
+			To check if any of this is working, I limited the triangles that would be checked. They appeared to be split rectangularly as I expected.
+			<p>Verifying the BVH construction of the triangle array:</p>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/gpu/bvh/triangle_array_verify.png" width="370px"/>
+							<figcaption><code>sky/CBbunny.dae</code></figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<br>
+			Recursion in GLSL is not possible, so tree traversal is made more difficult. At first I thought I would store the children and parent for each node. This might allow the shader to walk through the tree in a simple loop.<br>
+			Since I haven't implemented this, I'm not sure this is possible without some sort of tree depth-sized extra memory per thread.<br>
+			Instead, I came across a solution online that makes the shader very simple. For each node, you store the next node on hit and the next node on miss.
+			(<a href="https://stackoverflow.com/questions/55479683/traversal-of-bounding-volume-hierachy-in-shaders">Idea from Stack Overflow</a>)<br>
+			The node storage isn't any larger because child and parent pointers no longer have to be stored.<br>
+
+			<p>Traversal:</p>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/gpu/bvh/traversal.png" width="75%"/>
+							<figcaption>Diagram displaying tree traversal</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<p>Result:</p>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/gpu/bvh/bunny.png" width="370px"/>
+							<figcaption><code>sky/CBbunny.dae</code></figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/gpu/bvh/lucy.png" width="370px"/>
+							<figcaption><code>sky/CBlucy.dae</code></figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<br>
+			<code>sky/CBlucy.dae</code> went from 0.1175 seconds (CPU) to 0.0126 seconds (GPU).<br>
+			<code>sky/CBbunny.dae</code> went from 0.0959 seconds (CPU) to 0.0154 seconds (GPU).<br>
+			This is slightly less than I was hoping, but I have not done any work load optimization for the compute shader dispatch.<br>
+			The GPU times also include shader compilation, resource construction, and upload time, though these are probably minimal.
+
+			<br><br>
 		</div>
 	</body>
 </html>
