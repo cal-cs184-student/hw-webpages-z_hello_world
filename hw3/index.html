@@ -701,11 +701,11 @@ h1 {
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
-							<img src="images/gpu/bvh/bunny.png" width="370px"/>
+							<img src="images/gpu/bvh/bunny.png" width="512px"/>
 							<figcaption><code>sky/CBbunny.dae</code></figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/gpu/bvh/lucy.png" width="370px"/>
+							<img src="images/gpu/bvh/lucy.png" width="512px"/>
 							<figcaption><code>sky/CBlucy.dae</code></figcaption>
 						</td>
 					</tr>
@@ -713,10 +713,112 @@ h1 {
 			</div>
 
 			<br>
-			<code>sky/CBlucy.dae</code> went from 0.1175 seconds (CPU) to 0.0126 seconds (GPU).<br>
-			<code>sky/CBbunny.dae</code> went from 0.0959 seconds (CPU) to 0.0154 seconds (GPU).<br>
-			This is slightly less than I was hoping, but I have not done any work load optimization for the compute shader dispatch.<br>
+			For the following: [__, __] CPU timing means [time for single thread, time for 20 threads (10 cores)].<br>
+			<code>sky/CBlucy.dae</code> went from [0.1177, 0.0215] seconds (CPU) to 0.0126 seconds (GPU).<br>
+			<code>sky/CBbunny.dae</code> went from [0.0983, 0.0209] seconds (CPU) to 0.0154 seconds (GPU).<br>
+			This is not what I was hoping, but I have not done any work load optimization for the compute shader dispatch.<br>
 			The GPU times also include shader compilation, resource construction, and upload time, though these are probably minimal.
+
+
+			<h4>Sampling:</h4>
+			Pretty much the entire random number generation is based on <code>HybridTaus</code> from <a href="https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing/chapter-37-efficient-random-number-generation-and-application">GPU Gems 3 Chapter 37</a>.<br>
+
+			It took some fiddling with the four integers used to seed the generator, but the final result looks random enough if a few time steps are used to initialize it.
+
+			<p>Testing noise:</p>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/gpu/sampling/grayscale_randf.png" width="370px"/>
+							<figcaption>One random value between 0 and 1 for each pixel</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/gpu/sampling/rgb_randf.png" width="370px"/>
+							<figcaption>Three random values between 0 and 1 for each pixel</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<p>Sampling pixels randomly for anti-aliasing:</p>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/gpu/sampling/bunny_ns_aa_64.png" width="512px"/>
+							<figcaption><code>sky/CBbunny.dae</code> at 64spp</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/gpu/sampling/lucy_ns_aa_64.png" width="512px"/>
+							<figcaption><code>sky/CBlucy.dae</code> at 64spp</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<br>
+			And after a bit of code translation from other parts of the project, and copying the code for color conversion (taken from <code>HDRImageBuffer</code>):
+
+			<p>Importance sampled area light:</p>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/gpu/sampling/bunny_importance_cpu.png" width="512px"/>
+							<figcaption>Original CPU rendering of <code>sky/CBbunny.dae</code></figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/gpu/sampling/bunny_importance_gpu.png" width="512px"/>
+							<figcaption>New GPU rendering of <code>sky/CBbunny.dae</code></figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<br>
+
+			<h4>Global Illumination (final result):</h4>
+
+			After moving the rest of the code over, here is a side by side comparisons of a globally illuminated render:
+			<br>
+			<br>
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/gpu/global/cpu_bunny.png" width="512px"/>
+							<figcaption>Original CPU rendering of <code>sky/CBbunny.dae</code><br>(single thread: 73.6548s, 20 thread: 14.5832s)</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/gpu/global/gpu_bunny.png" width="512px"/>
+							<figcaption>New GPU rendering of <code>sky/CBbunny.dae</code><br>(3.4601s)</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<br>
+			It would appear that doing the global illumination has improved the GPU's relative performance for this specific scene.
+			<br>
+			<br>
+			<br>
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/gpu/global/lucy.png" width="512px"/>
+							<figcaption>GPU rendering of <code>sky/CBlucy.dae</code> (8.2428s)</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<br><br>
+
+			<h4>Conclusion:</h4>
+			The GPU clearly makes path tracing faster for these scenes, but not as much as I expected. Especially because (for my implementation) the GPU is only working with single precision floating point numbers while the CPU is working with doubles.<br>
+			I think more time (that I do not have at the moment) needs to be put into analyzing the GPU performance. I did not focus on work dispatch at all, so that would be a good place to start. Currently, it dispatches one compute thread per pixel that runs everything.
 
 			<br><br>
 		</div>
