@@ -32,7 +32,7 @@ h1 {
 
 			<br>
 
-			Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-z_hello_world/hw3/index.html">https://cal-cs184-student.github.io/hw-webpages-z_hello_world/hw3-2/index.html</a>
+			Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-z_hello_world/hw3-2/index.html">https://cal-cs184-student.github.io/hw-webpages-z_hello_world/hw3-2/index.html</a>
 			<br>
 			Link to GitHub repository: <a href="https://github.com/cal-cs184-student/hw-webpages-z_hello_world">https://github.com/cal-cs184-student/hw-webpages-z_hello_world</a>
 
@@ -42,111 +42,326 @@ h1 {
 
 			<!--
 				We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
-
-				<div style="display: flex; flex-direction: column; align-items: center;">
-				<table style="width: 100%; text-align: center; border-collapse: collapse;">
-				<tr>
-				<td style="text-align: center;">
-				<img src="images/part1/spheres.png" width="400px"/>
-				<figcaption><code>sky/CBspheres_lambertian.dae</code></figcaption>
-				</td>
-				<td style="text-align: center;">
-				<img src="images/part1/gems.png" width="400px"/>
-				<figcaption><code>sky/CBgems.dae</code></figcaption>
-				</td>
-				</tr>
-				<tr>
-				<td style="text-align: center;">
-				<img src="images/part1/coil.png" width="400px"/>
-				<figcaption><code>sky/CBcoil.dae</code></figcaption>
-				</td>
-				<td style="text-align: center;">
-				<img src="images/part1/dragon.png" width="400px"/>
-				<figcaption><code>sky/CBdragon.dae</code></figcaption>
-				</td>
-				</tr>
-				</table>
-				</div>
 			-->
 
 			<h2>Part 1. Mirror and Glass Materials</h2>
 
 			<p><b>
-				Show a sequence of six images of scene `CBspheres.dae` rendered with `max_ray_depth` set to 0, 1, 2, 3, 4, 5, and 100. The other settings should be at least 64 samples per pixel and 4 samples per light. Make sure to include all screenshots.
+				Show a sequence of six images of scene <code>CBspheres.dae</code> rendered with <code>max_ray_depth</code> set to 0, 1, 2, 3, 4, 5, and 100. The other settings should be at least 64 samples per pixel and 4 samples per light. Make sure to include all screenshots.
 			</b></p>
 			<p>
-			Your response goes here.
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part1_spheres_0.png" width="100%"/>
+							<figcaption><code>sky/CBspheres.dae</code> 0 bounce</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part1_spheres_1.png" width="100%"/>
+							<figcaption><code>sky/CBspheres.dae</code> 1 bounce</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part1_spheres_2.png" width="100%"/>
+							<figcaption><code>sky/CBspheres.dae</code> 2 bounce</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part1_spheres_3.png" width="100%"/>
+							<figcaption><code>sky/CBspheres.dae</code> 3 bounce</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part1_spheres_4.png" width="100%"/>
+							<figcaption><code>sky/CBspheres.dae</code> 4 bounce</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part1_spheres_5.png" width="100%"/>
+							<figcaption><code>sky/CBspheres.dae</code> 5 bounce</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part1_spheres_100.png" width="100%"/>
+							<figcaption><code>sky/CBspheres.dae</code> 100 bounce</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
 			</p>
 			<br>
 			<p><b>
 				Point out the new multibounce effects that appear in each image. 
 			</b></p>
 			<p>
-			Your response goes here.
+
+			At zero bounces, there is only direct illumination, so only the area light is visible.<br>
+			At one bounce, there is direct illumination. This just gets direct reflections from emitting objects, so you see diffuse illumination on the floor and walls, and the reflection of the area light in the spheres.<br>
+			At two bounces, the scene is visible in the reflections on the spheres. The reflection in the spheres looks like the image from the one bounce illumination.<br>
+			At three bounces, the image starts to look mostly correct. The ceiling is illuminated in the mirror reflections, and refraction of the walls throught the glass sphere is now visible. There is also a focusing effect of the light through the glass sphere.<br>
+			At four bounces, there is a bright spot on the blue wall from more complex interactions. The refrective sphere looks correct in the reflection off of the mirror sphere.<br>
+			At five bounces, the diffuse surfaces in the reflections and refractions look slightly more illuminated.<br>
+			At one hundred bounces, the ceiling gets slightly more illumination, and the refractive sphere is brighter looking.
+
 			</p>
 			<br>
 			<p><b>
 				Explain how these bounce numbers relate to the particular effects that appear. Make sure to include all screenshots.
 			</b></p>
 			<p>
-			Your response goes here.
+			The area light is visible because the camera ray hits it directly in all images.<br>
+
+			At one bounce, the rays are able to reflect off of objects into the camera. This means that the diffuse materials that are not in shadow are visible to the camera. Also, the area light is reflected off of the mirror and glass materials.<br>
+
+			At two bounces, the rays can escape shadowed diffuse areas to allow for ambient diffuse illumination. The reflected rays from the spheres are able to bounce one more time off of the walls and floor, so the scene is visible in the reflection.<br>
+
+			At three bounces, the reflections off of the mirror have ambient lighting (most visible for the reflection of the ceiling) because rays can bounce off of the sphere, onto diffuse, onto diffuse, into light.
+			The light that passes through the glass sphere is also visible. This is because the ray can hit the sphere twice (enter and exit), hit a diffuse surface, and hit the light.
+			Refraction of the area light would have been visible at the previous step if the light was behind the glass sphere.
+			The refractive sphere is able to focus the light onto the diffuse surfaces: There is a bright spot under the glass sphere where the ray hit a diffuse surface then went straight throught the glass sphere to the light.
+			This appears to be acting like a magnifying glass focusing the sun.<br>
+
+			At four bounces, the reflection of the refractive sphere works. This takes the same steps as the refraction from the camera, but bounces off the mirror sphere first.
+			The bright spot on the floor is reflecting off of the glass sphere, making it appear bright. There is also a bright spot on the blue wall. I believe this is the reflection of the light off of the mirror sphere, focused through the glass sphere onto the wall.<br>
+
+			At five bounces, every diffuse surface looks slightly brighter. This is probably just more ways the light can bounce throught the scene. Another way to look at it is that the bias of early ray termination is being reduced.<br>
+
+			At one hundred bounces, the ceiling looks brighter. This is probably the same effect as five bounces, but greater. There is also a sheen off of the top of the glass sphere.
 			</p>
 			<br>
 
 			<h2>Part 2. Microfacet Material</h2>
 
 			<p><b>
-				Show a screenshot sequence of 4 images of scene `CBdragon_microfacet_au.dae` rendered with $\alpha$ set to 0.005, 0.05, 0.25 and 0.5. The other settings should be at least 128 samples per pixel and 1 samples per light. The number of bounces should be at least 5. Describe the differences between different images. Note that, to change the $\alpha$, just open the .dae file and search for `microfacet`.
+				Show a screenshot sequence of 4 images of scene <code>CBdragon_microfacet_au.dae</code> rendered with \(\alpha\) set to 0.005, 0.05, 0.25 and 0.5. The other settings should be at least 128 samples per pixel and 1 samples per light. The number of bounces should be at least 5. Describe the differences between different images. Note that, to change the \(\alpha\), just open the .dae file and search for <code>microfacet</code>.
 			</b></p>
 			<p>
-			Your response goes here.
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part2_dragon_005.png" width="100%"/>
+							<figcaption><code>sky/CBdragon_microfacet_au.dae</code> \(\alpha=0.005\)</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part2_dragon_05.png" width="100%"/>
+							<figcaption><code>sky/CBdragon_microfacet_au.dae</code> \(\alpha=0.05\)</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part2_dragon_25.png" width="100%"/>
+							<figcaption><code>sky/CBdragon_microfacet_au.dae</code> \(\alpha=0.25\)</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part2_dragon_5.png" width="100%"/>
+							<figcaption><code>sky/CBdragon_microfacet_au.dae</code> \(\alpha=0.5\)</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
 			</p>
 			<br>
 			<p><b>
-				Show two images of scene `CBbunny_microfacet_cu.dae` rendered using cosine hemisphere sampling (default) and your importance sampling. The sampling rate should be fixed at 64 samples per pixel and 1 samples per light. The number of bounces should be at least 5. Briefly discuss their difference.
+				Show two images of scene <code>CBbunny_microfacet_cu.dae</code> rendered using cosine hemisphere sampling (default) and your importance sampling. The sampling rate should be fixed at 64 samples per pixel and 1 samples per light. The number of bounces should be at least 5. Briefly discuss their difference.
 			</b></p>
 			<p>
-			Your response goes here.
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part2_bunny_uniform.png" width="100%"/>
+							<figcaption><code>sky/CBbunny_microfacet_cu.dae</code> uniform hemisphere sampling</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part2_bunny_importance.png" width="100%"/>
+							<figcaption><code>sky/CBbunny_microfacet_cu.dae</code> importance sampling</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			The hemisphere sampling is so slow to converge that it doesn't look like the same material. The sampled points almost look binary because the variance is so high.<br>
+			The importance sampled bunny looks much better. It is clearly a shiny material and has much cleaner specular bright areas. The noise on the walls and ceiling also appears to be less.
+
 			</p>
 			<br>
 			<p><b>
-				Show at least one image with some other conductor material, replacing `eta` and `k`. Note that you should look up values for real data rather than modifying them arbitrarily. Tell us what kind of material your parameters correspond to. 
+				Show at least one image with some other conductor material, replacing <code>eta</code> and <code>k</code>. Note that you should look up values for real data rather than modifying them arbitrarily. Tell us what kind of material your parameters correspond to. 
 			</b></p>
 			<p>
-			Your response goes here.
+			The following material uses values from the entry for Titanium at <a href="https://refractiveindex.info/?shelf=main&book=V&page=Werner">https://refractiveindex.info/?shelf=main&book=V&page=Werner</a>.
+
+			\[\alpha=0.3\]
+			\[\eta=\left[0.4677, 0.6042, 0.9091\right]\]
+			\[k=\left[5.2422, 4.5318, 3.6096\right]\]
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part2_lucy_titanium.png" width="50%"/>
+							<figcaption><code>sky/CBlucy_ti.dae</code> Titanium material with \(\alpha=0.3\)</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
 			</p>
 			<br>
 
 			<h2>Part 3. Environment Lightl</h2>
 
-			<b>Pick one *.exr* file to use for all subparts here. Include a converted *.jpg* of it in your website so we know what map you are using.</b>
+			<b>Pick one <code>.exr</code> file to use for all subparts here. Include a converted <code>.jpg</code> of it in your website so we know what map you are using.</b>
+
+			<br><br>
+			I used two environment maps to compare the effect of different extremes of lighting conditions. One has a fairly low contrast while the other is very bright from one direction.
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part3_industrial_sunset_02_4k.png" width="50%"/>
+							<figcaption>Field (Low Contrast Outdoor Lighting)</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part3_studio_small_03_1k.png" width="50%"/>
+							<figcaption>Studio (High Contrast Indoor Lighting)</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
 
 			<p><b>
 				In a few sentences, explain the ideas behind environment lighting (i.e. why we do it/how it works).
 			</b></p>
 			<p>
-			Your response goes here.
+			Environment lighting allows for the recreation real world lighting on a rendered scene. It keeps the direction and radiance incoming from far distances.
+			Then, when rendering, any ray that goes off to infinity (hits far clipping plane) can use the radiance captured from the environment. This is very good for recreating nice looking lighting and even a background, without having to create geometry for it.
 			</p>
 			<br>
 			<p><b>
-				Show the *probability_debug.png* file for the *.exr* file you are using, generated using the `save_probability_debug()` helper function after initializing your probability distributions.
+				Show the <code>probability_debug.png</code> file for the <code>.exr</code> file you are using, generated using the <code>save_probability_debug()</code> helper function after initializing your probability distributions.
 			</b></p>
 			<p>
-			Your response goes here.
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part3_field_probability.png" width="50%"/>
+							<figcaption>Field</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part3_studio_probability.png" width="50%"/>
+							<figcaption>Studio</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
 			</p>
 			<br>
 			<p><b>
-				Use the `bunny_unlit.dae` scene and your environment map *.exr* file and render two pictures, one with uniform sampling and one with importance sampling. Use 4 samples per pixel and 64 samples per light in each. Compare noise levels. Make sure to include all screenshots.
+				Use the <code>bunny_unlit.dae</code> scene and your environment map <code>.exr</code> file and render two pictures, one with uniform sampling and one with importance sampling. Use 4 samples per pixel and 64 samples per light in each. Compare noise levels. Make sure to include all screenshots.
 			</b></p>
 			<p>
-			Your response goes here.
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part3_bunny_uniform.png" width="100%"/>
+							<figcaption>Field <code>sky/bunny_unlit.dae</code> uniform hemisphere sampling</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part3_bunny_importance.png" width="100%"/>
+							<figcaption>Field <code>sky/bunny_unlit.dae</code> importance sampling</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part3_bunny_studio_uniform.png" width="100%"/>
+							<figcaption>Studio <code>sky/bunny_unlit.dae</code> uniform hemisphere sampling</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part3_bunny_studio_importance.png" width="100%"/>
+							<figcaption>Studio <code>sky/bunny_unlit.dae</code> importance sampling</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			The noise improvement for the field environment is hard to see without flipping back and forth between the images. It is still definitely less when using the importance sampling.
+			The uniform sampling has bright spots all around the bunny and pedestal.<br>
+			For the studio environment, the difference is huge. The importance sampling is way better. This is because a vast majority of the lighting comes from a few small regions of the environment.
+			That causes most of the uniformly sampled rays to be much darker than average, so the variance is very high.
+
 			</p>
 			<br>
 			<p><b>
-				Use a different image (if you did part 2, we recommend `bunny_microfacet_cu_unlit.dae`) and your environment map *.exr* file and render two pictures, one with uniform sampling and one with importance sampling. Use 4 samples per pixel and 64 samples per light in each. Compare noise levels. Make sure to include all screenshots.
+				Use a different image (if you did part 2, we recommend <code>bunny_microfacet_cu_unlit.dae</code>) and your environment map <code>.exr</code> file and render two pictures, one with uniform sampling and one with importance sampling. Use 4 samples per pixel and 64 samples per light in each. Compare noise levels. Make sure to include all screenshots.
 			</b></p>
 			<p>
-			Your response goes here.
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part3_bunny_cu_field_uniform.png" width="100%"/>
+							<figcaption>Field <code>sky/bunny_microfacet_cu_unlit.dae</code> uniform hemisphere sampling</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part3_bunny_cu_field_importance.png" width="100%"/>
+							<figcaption>Field <code>sky/bunny_microfacet_cu_unlit.dae</code> importance sampling</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part3_bunny_cu_studio_uniform.png" width="100%"/>
+							<figcaption>Studio <code>sky/bunny_microfacet_cu_unlit.dae</code> uniform hemisphere sampling</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part3_bunny_cu_studio_importance.png" width="100%"/>
+							<figcaption>Studio <code>sky/bunny_microfacet_cu_unlit.dae</code> importance sampling</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			The noise in the field environment is slightly better with importance sampling. Some details in the reflection also become visible. The orange hue near the sun is much more visible in the reflection of the importance sampled render.<br>
+			In the studio environment, the noise difference is more apparent. The the diffuse part is better, but the metal material has more noise with importance sampling.
+			I believe this is because this camera angle has the lights to the right and left of the model. These angles are unlikely to reflect off of a microfacet surface from that angle into the camera, so they get canceled out by the BSDF.<br>
+			Perhaps combining both importance sampling methods could fix this issue. It could sample the environment with two different schemes. One with the environment light PDF, and one with the microfaced PDF.
+			Then it could capture the bright parts of the environment and get the mirror-like reflections from shiny microfacet materials.
+
+			<br>
+			<br>
+
+			To make sure I implemented the sampling correctly, I plotted a small set of positions on the environment map that were sampled (vertical axis is flipped):
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part3_sampling.png" width="60%"/>
+							<figcaption>Scatter Plot of Sampled Points in Studio Environment</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			A large number of samples are clumped around the extremely bright light, less samples around the diffuser, and just a few samples around the rest of the sphere. This matches expectation.
+
 			</p>
 			<br>
 
@@ -159,21 +374,88 @@ h1 {
 				In a few sentences, explain the differences between a pinhole camera model and a thin-lens camera model. 
 			</b></p>
 			<p>
-			Your response goes here.
+
+			The pinhole model calculates rays traveling through a point from a plane to a plane. This means that each point on the screen/sensor will only capture rays coming in from the same direction.<br>
+			The thin-lens model simulates a lens by using an approximation of lenses to create a range of possible ray direcitons to sample from for each point on the screen/sensor.<br>
+			The reference image on the asasignment page is no longer available, so I made a simple picture to help me when implementing the thin-lens.
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part4_thinlense.png" width="40%"/>
+							<figcaption>Thin-lense diagram</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			The thin-lens model takes the point that the pinhole model would find on the plane of focus and sends a ray from a random position on the lens to that point.
+
 			</p>
 			<br>
 			<p><b>
 				Show a "focus stack" where you focus at 4 visibly different depths through a scene. Make sure to include all screenshots.
 			</b></p>
 			<p>
-			Your response goes here.
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part4_lucy_ti_f0.png" width="100%"/>
+							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> at focal distance </figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part4_lucy_ti_f1.png" width="100%"/>
+							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> at focal distance </figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part4_lucy_ti_f2.png" width="100%"/>
+							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> at focal distance </figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part4_lucy_ti_f3.png" width="100%"/>
+							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> at focal distance </figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
 			</p>
 			<br>
 			<p><b>
 				Show a sequence of 4 pictures with visibly different aperture sizes, all focused at the same point in a scene. Make sure to include all screenshots.
 			</b></p>
 			<p>
-			Your response goes here.
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part4_lucy_ti_a0.png" width="100%"/>
+							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> with lens radius </figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part4_lucy_ti_a1.png" width="100%"/>
+							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> with lens radius </figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part4_lucy_ti_a2.png" width="100%"/>
+							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> with lens radius </figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/part4_lucy_ti_a3.png" width="100%"/>
+							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> with lens radius </figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
 			</p>
 			<br>
 
