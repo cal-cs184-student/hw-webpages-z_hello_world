@@ -1,0 +1,182 @@
+<html>
+	<head>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+		<style>
+h1 {
+	text-align: center;
+}
+
+			.container {
+				margin: 0 auto;
+				padding: 60px 20%;
+			}
+
+			figure {
+				text-align: center;
+			}
+
+			img {
+				display: inline-block;
+			}
+
+			body {
+				font-family: 'Inter', sans-serif;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>CS184/284A Spring 2025 Homework 3-2 Write-Up</h1>
+			<div style="text-align: center;">Names: Benjamin Bliss</div>
+
+			<br>
+
+			Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-z_hello_world/hw3/index.html">https://cal-cs184-student.github.io/hw-webpages-z_hello_world/hw3-2/index.html</a>
+			<br>
+			Link to GitHub repository: <a href="https://github.com/cal-cs184-student/hw-webpages-z_hello_world">https://github.com/cal-cs184-student/hw-webpages-z_hello_world</a>
+
+			<figure>
+				<img src="cover.png" alt="" style="width:20%"/>
+			</figure>
+
+			<!--
+				We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
+
+				<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+				<td style="text-align: center;">
+				<img src="images/part1/spheres.png" width="400px"/>
+				<figcaption><code>sky/CBspheres_lambertian.dae</code></figcaption>
+				</td>
+				<td style="text-align: center;">
+				<img src="images/part1/gems.png" width="400px"/>
+				<figcaption><code>sky/CBgems.dae</code></figcaption>
+				</td>
+				</tr>
+				<tr>
+				<td style="text-align: center;">
+				<img src="images/part1/coil.png" width="400px"/>
+				<figcaption><code>sky/CBcoil.dae</code></figcaption>
+				</td>
+				<td style="text-align: center;">
+				<img src="images/part1/dragon.png" width="400px"/>
+				<figcaption><code>sky/CBdragon.dae</code></figcaption>
+				</td>
+				</tr>
+				</table>
+				</div>
+			-->
+
+			<h2>Part 1. Mirror and Glass Materials</h2>
+
+			<p><b>
+				Show a sequence of six images of scene `CBspheres.dae` rendered with `max_ray_depth` set to 0, 1, 2, 3, 4, 5, and 100. The other settings should be at least 64 samples per pixel and 4 samples per light. Make sure to include all screenshots.
+			</b></p>
+			<p>
+			Your response goes here.
+			</p>
+			<br>
+			<p><b>
+				Point out the new multibounce effects that appear in each image. 
+			</b></p>
+			<p>
+			Your response goes here.
+			</p>
+			<br>
+			<p><b>
+				Explain how these bounce numbers relate to the particular effects that appear. Make sure to include all screenshots.
+			</b></p>
+			<p>
+			Your response goes here.
+			</p>
+			<br>
+
+			<h2>Part 2. Microfacet Material</h2>
+
+			<p><b>
+				Show a screenshot sequence of 4 images of scene `CBdragon_microfacet_au.dae` rendered with $\alpha$ set to 0.005, 0.05, 0.25 and 0.5. The other settings should be at least 128 samples per pixel and 1 samples per light. The number of bounces should be at least 5. Describe the differences between different images. Note that, to change the $\alpha$, just open the .dae file and search for `microfacet`.
+			</b></p>
+			<p>
+			Your response goes here.
+			</p>
+			<br>
+			<p><b>
+				Show two images of scene `CBbunny_microfacet_cu.dae` rendered using cosine hemisphere sampling (default) and your importance sampling. The sampling rate should be fixed at 64 samples per pixel and 1 samples per light. The number of bounces should be at least 5. Briefly discuss their difference.
+			</b></p>
+			<p>
+			Your response goes here.
+			</p>
+			<br>
+			<p><b>
+				Show at least one image with some other conductor material, replacing `eta` and `k`. Note that you should look up values for real data rather than modifying them arbitrarily. Tell us what kind of material your parameters correspond to. 
+			</b></p>
+			<p>
+			Your response goes here.
+			</p>
+			<br>
+
+			<h2>Part 3. Environment Lightl</h2>
+
+			<b>Pick one *.exr* file to use for all subparts here. Include a converted *.jpg* of it in your website so we know what map you are using.</b>
+
+			<p><b>
+				In a few sentences, explain the ideas behind environment lighting (i.e. why we do it/how it works).
+			</b></p>
+			<p>
+			Your response goes here.
+			</p>
+			<br>
+			<p><b>
+				Show the *probability_debug.png* file for the *.exr* file you are using, generated using the `save_probability_debug()` helper function after initializing your probability distributions.
+			</b></p>
+			<p>
+			Your response goes here.
+			</p>
+			<br>
+			<p><b>
+				Use the `bunny_unlit.dae` scene and your environment map *.exr* file and render two pictures, one with uniform sampling and one with importance sampling. Use 4 samples per pixel and 64 samples per light in each. Compare noise levels. Make sure to include all screenshots.
+			</b></p>
+			<p>
+			Your response goes here.
+			</p>
+			<br>
+			<p><b>
+				Use a different image (if you did part 2, we recommend `bunny_microfacet_cu_unlit.dae`) and your environment map *.exr* file and render two pictures, one with uniform sampling and one with importance sampling. Use 4 samples per pixel and 64 samples per light in each. Compare noise levels. Make sure to include all screenshots.
+			</b></p>
+			<p>
+			Your response goes here.
+			</p>
+			<br>
+
+			<h2>Part 4. Depth of Field</h2>
+
+			<b>
+				For these subparts, we recommend using a microfacet BSDF scene to show off the cool out of focus effects you can get with depth of field!
+			</b>
+			<p><b>
+				In a few sentences, explain the differences between a pinhole camera model and a thin-lens camera model. 
+			</b></p>
+			<p>
+			Your response goes here.
+			</p>
+			<br>
+			<p><b>
+				Show a "focus stack" where you focus at 4 visibly different depths through a scene. Make sure to include all screenshots.
+			</b></p>
+			<p>
+			Your response goes here.
+			</p>
+			<br>
+			<p><b>
+				Show a sequence of 4 pictures with visibly different aperture sizes, all focused at the same point in a scene. Make sure to include all screenshots.
+			</b></p>
+			<p>
+			Your response goes here.
+			</p>
+			<br>
+
+		</div>
+	</body>
+</html>
