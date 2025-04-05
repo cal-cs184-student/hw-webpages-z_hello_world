@@ -44,6 +44,16 @@ h1 {
 				We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
 			-->
 
+			<h2>Overview</h2>
+			In this homework, I implemented several components of a more complete path tracer. This included new materials for mirrors, glass and microfacet surfaces as well as environment maps and depth of field.<br>
+			The mirror material was quite simple. It mostly involved calculating the reflection of a vector. The glass material modeled Snell's law with Schlick's approximation to get reflection at shallower angles.<br>
+			To get the microfacet material started, the distribution of normals and the fresnel had to be calculated. Then the sample function uniformly sampled the hemisphere of incoming radiance. This was very slow to converge, so the next step was to implement importance sampling.
+			A good importance sampling PDF was provided along with the inverse of the CDF. The sample is generated with the inversion method using the inverse CDF. This made the images much cleaner.<br>
+			The initial environment lighting implementation used linear pixel interpolation to lookup values in the map for any ray that escaped the geometry of the scene. The direct illumination and bounce illumination were seperated just like for the area light.
+			This was very noisy for diffuse materials. To implement importance sampling for this, a 2D version of the inversion method was used. First use the inverse CDF for the vertical position in the whole image. Then use the CDF for that row (conditional on the vertical position).
+			This created very good looking diffuse lighting with relatively few samples.<br>
+			Finally, the depth of field effect used the thin-lens approximation to randomly generate rays from the set of rays that could reach a given point on the sensor.
+
 			<h2>Part 1. Mirror and Glass Materials</h2>
 
 			<p><b>
@@ -112,7 +122,7 @@ h1 {
 				Explain how these bounce numbers relate to the particular effects that appear. Make sure to include all screenshots.
 			</b></p>
 			<p>
-			The area light is visible because the camera ray hits it directly in all images.<br>
+			The area light is visible in the first image because the camera ray hits it directly. Everything else is black because at least one bounce is required to see anything that doesn't emit light.<br>
 
 			At one bounce, the rays are able to reflect off of objects into the camera. This means that the diffuse materials that are not in shadow are visible to the camera. Also, the area light is reflected off of the mirror and glass materials.<br>
 
@@ -127,13 +137,25 @@ h1 {
 			At four bounces, the reflection of the refractive sphere works. This takes the same steps as the refraction from the camera, but bounces off the mirror sphere first.
 			The bright spot on the floor is reflecting off of the glass sphere, making it appear bright. There is also a bright spot on the blue wall. I believe this is the reflection of the light off of the mirror sphere, focused through the glass sphere onto the wall.<br>
 
-			At five bounces, every diffuse surface looks slightly brighter. This is probably just more ways the light can bounce throught the scene. Another way to look at it is that the bias of early ray termination is being reduced.<br>
+			At five bounces, every diffuse surface looks slightly brighter. This is probably just more ways the light can bounce throught the scene. Another way to look at it is that the early ray termination bias is being reduced.<br>
 
 			At one hundred bounces, the ceiling looks brighter. This is probably the same effect as five bounces, but greater. There is also a sheen off of the top of the glass sphere.
 			</p>
 			<br>
 
 			<h2>Part 2. Microfacet Material</h2>
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/part2_microfacet_pdf.png" width="60%"/>
+							<figcaption>Polar plot of microfacet probability density function for \(\theta\)
+							(<a href="https://www.desmos.com/calculator/9lyzkbwcv7">link to interactive plot</a>)</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
 
 			<p><b>
 				Show a screenshot sequence of 4 images of scene <code>CBdragon_microfacet_au.dae</code> rendered with \(\alpha\) set to 0.005, 0.05, 0.25 and 0.5. The other settings should be at least 128 samples per pixel and 1 samples per light. The number of bounces should be at least 5. Describe the differences between different images. Note that, to change the \(\alpha\), just open the .dae file and search for <code>microfacet</code>.
@@ -164,6 +186,8 @@ h1 {
 					</tr>
 				</table>
 			</div>
+			The \(\alpha\) term appears to be changing how much light is scattered randomly by the surface. At \(\alpha=0.005\), the material looks very smooth/polished. As \(\alpha\) increases, the surface looks more and more rough.
+			For the extremely smooth object, the ceiling also seems to be getting a bit of noise from the reflection of the area light.
 
 			</p>
 			<br>
@@ -196,7 +220,7 @@ h1 {
 				Show at least one image with some other conductor material, replacing <code>eta</code> and <code>k</code>. Note that you should look up values for real data rather than modifying them arbitrarily. Tell us what kind of material your parameters correspond to. 
 			</b></p>
 			<p>
-			The following material uses values from the entry for Titanium at <a href="https://refractiveindex.info/?shelf=main&book=V&page=Werner">https://refractiveindex.info/?shelf=main&book=V&page=Werner</a>.
+			The following material uses values from the Titanium entry at <a href="https://refractiveindex.info/?shelf=main&book=V&page=Werner">https://refractiveindex.info/?shelf=main&book=V&page=Werner</a>.
 
 			\[\alpha=0.3\]
 			\[\eta=\left[0.4677, 0.6042, 0.9091\right]\]
@@ -221,7 +245,7 @@ h1 {
 			<b>Pick one <code>.exr</code> file to use for all subparts here. Include a converted <code>.jpg</code> of it in your website so we know what map you are using.</b>
 
 			<br><br>
-			I used two environment maps to compare the effect of different extremes of lighting conditions. One has a fairly low contrast while the other is very bright from one direction.
+			I used two environment maps to compare the effect of different extremes of lighting conditions. One has a fairly low contrast while the other is very bright for two small regions.
 
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -244,7 +268,7 @@ h1 {
 				In a few sentences, explain the ideas behind environment lighting (i.e. why we do it/how it works).
 			</b></p>
 			<p>
-			Environment lighting allows for the recreation real world lighting on a rendered scene. It keeps the direction and radiance incoming from far distances.
+			Environment lighting allows for the recreation real world lighting on a rendered scene. It stores the radiance from far distances for each direction.
 			Then, when rendering, any ray that goes off to infinity (hits far clipping plane) can use the radiance captured from the environment. This is very good for recreating nice looking lighting and even a background, without having to create geometry for it.
 			</p>
 			<br>
@@ -269,6 +293,8 @@ h1 {
 					</tr>
 				</table>
 			</div>
+
+			In the studio probability image, the CDF transitions very sharply around the light source, suggesting that many samples will be found in that region.
 
 			</p>
 			<br>
@@ -302,9 +328,9 @@ h1 {
 				</table>
 			</div>
 
-			The noise improvement for the field environment is hard to see without flipping back and forth between the images. It is still definitely less when using the importance sampling.
+			The noise improvement for the field environment is hard to see without flipping back and forth between the images. It is still definitely less when using importance sampling.
 			The uniform sampling has bright spots all around the bunny and pedestal.<br>
-			For the studio environment, the difference is huge. The importance sampling is way better. This is because a vast majority of the lighting comes from a few small regions of the environment.
+			For the studio environment, the difference is huge. Importance sampling is way better. This is because a vast majority of the lighting comes from a few small regions of the environment.
 			That causes most of the uniformly sampled rays to be much darker than average, so the variance is very high.
 
 			</p>
@@ -341,8 +367,8 @@ h1 {
 
 			The noise in the field environment is slightly better with importance sampling. Some details in the reflection also become visible. The orange hue near the sun is much more visible in the reflection of the importance sampled render.<br>
 			In the studio environment, the noise difference is more apparent. The the diffuse part is better, but the metal material has more noise with importance sampling.
-			I believe this is because this camera angle has the lights to the right and left of the model. These angles are unlikely to reflect off of a microfacet surface from that angle into the camera, so they get canceled out by the BSDF.<br>
-			Perhaps combining both importance sampling methods could fix this issue. It could sample the environment with two different schemes. One with the environment light PDF, and one with the microfaced PDF.
+			I believe this is because this camera angle has the lights to the right and left of the model. These angles are unlikely to reflect off of a microfacet surface from that angle into the camera, so they get canceled out by the BRDF.<br>
+			Perhaps combining both importance sampling methods could fix this issue. It could sample the environment with two different schemes. One following the environment light and one following the microfacet.
 			Then it could capture the bright parts of the environment and get the mirror-like reflections from shiny microfacet materials.
 
 			<br>
@@ -360,7 +386,7 @@ h1 {
 				</table>
 			</div>
 
-			A large number of samples are clumped around the extremely bright light, less samples around the diffuser, and just a few samples around the rest of the sphere. This matches expectation.
+			A large number of samples are clumped around the extremely bright light, less samples around the diffuser, and just a few samples around the rest of the sphere. The white floor (top of plot) has a few samples. The black ceiling (bottom of plot) has very few/no samples. This matches expectation.
 
 			</p>
 			<br>
@@ -368,7 +394,7 @@ h1 {
 			<h2>Part 4. Depth of Field</h2>
 
 			<b>
-				For these subparts, we recommend using a microfacet BSDF scene to show off the cool out of focus effects you can get with depth of field!
+				For these subparts, we recommend using a microfacet BRDF scene to show off the cool out of focus effects you can get with depth of field!
 			</b>
 			<p><b>
 				In a few sentences, explain the differences between a pinhole camera model and a thin-lens camera model. 
@@ -376,21 +402,40 @@ h1 {
 			<p>
 
 			The pinhole model calculates rays traveling through a point from a plane to a plane. This means that each point on the screen/sensor will only capture rays coming in from the same direction.<br>
-			The thin-lens model simulates a lens by using an approximation of lenses to create a range of possible ray direcitons to sample from for each point on the screen/sensor.<br>
-			The reference image on the asasignment page is no longer available, so I made a simple picture to help me when implementing the thin-lens.
+			The thin-lens model simulates a lens by using an approximation to create a range of possible ray direcitons to sample for each point on the screen/sensor.<br>
+			The reference image on the asasignment page is no longer available, so I made a simple picture to help me when implementing the thin-lens. This shows several possible ray directions for a given point on the sensor.<br>
+			The vertical line on the right is the sensor plane. The vertical line on the left is the plane of focus. The colorful lines are possible paths the light could go. The blue line in middle is the equivalent line for a pinhole camera.<br>
+			The actual ray is traced from the lens, so the right segments of the traces are not used in the implementation.
 
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
 							<img src="images/part4_thinlense.png" width="40%"/>
-							<figcaption>Thin-lense diagram</figcaption>
+							<figcaption>Thin-lens Diagram</figcaption>
 						</td>
 					</tr>
 				</table>
 			</div>
+			<br>
+			The thin-lens model takes the point that the pinhole model would find on the plane of focus and sends a ray from a random position on the lens to that point.<br>
+			<br>
 
-			The thin-lens model takes the point that the pinhole model would find on the plane of focus and sends a ray from a random position on the lens to that point.
+			To implement this:<br>
+			I started by finding the original pinhole direction in camera space (re-used code from 3-1).<br>
+			Then I got the camera space point on the focal plane,
+			\[
+			\left(\frac{-\text{focalDistance}}{d_z}\right)\vec{d}
+			\]
+			Then I sampled a random point on the lens with the given random input variables.<br>
+			With these two points, I calculated the camera space ray direction,
+			\[
+			p_\text{ focus} - p_\text{ lens}
+			\]
+			Then, I transformed this direction and the point on the lens to world space. After normalizing the final direction, I construct the ray originating at the world space sample point translated by the camera position.
+			<br>
+			In the following images, you can see that regions close to the plane of focus are clear, while the rest of the image is blurred.<br>
+			For the varying lens radii, the smaller lens creates a larger range of focus. This makes sense because a smaller radius looks more like the pinhole model.
 
 			</p>
 			<br>
@@ -399,26 +444,28 @@ h1 {
 			</b></p>
 			<p>
 
+			For the following images, the lens radius is 0.01:
+
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
 							<img src="images/part4_lucy_ti_f0.png" width="100%"/>
-							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> at focal distance </figcaption>
+							<figcaption><code>sky/CBlucy_ti.dae</code> at focal distance 0.15</figcaption>
 						</td>
 						<td style="text-align: center;">
 							<img src="images/part4_lucy_ti_f1.png" width="100%"/>
-							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> at focal distance </figcaption>
+							<figcaption><code>sky/CBlucy_ti.dae</code> at focal distance 0.46</figcaption>
 						</td>
 					</tr>
 					<tr>
 						<td style="text-align: center;">
 							<img src="images/part4_lucy_ti_f2.png" width="100%"/>
-							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> at focal distance </figcaption>
+							<figcaption><code>sky/CBlucy_ti.dae</code> at focal distance 0.7</figcaption>
 						</td>
 						<td style="text-align: center;">
 							<img src="images/part4_lucy_ti_f3.png" width="100%"/>
-							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> at focal distance </figcaption>
+							<figcaption><code>sky/CBlucy_ti.dae</code> at focal distance 1.3</figcaption>
 						</td>
 					</tr>
 				</table>
@@ -431,26 +478,28 @@ h1 {
 			</b></p>
 			<p>
 
+			For the following images, the focal distance is 0.46:
+
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
-							<img src="images/part4_lucy_ti_a0.png" width="100%"/>
-							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> with lens radius </figcaption>
+							<img src="images/part4_lucy_ti_a3.png" width="100%"/>
+							<figcaption><code>sky/CBlucy_ti.dae</code> with lens radius 0.07</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_lucy_ti_a1.png" width="100%"/>
-							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> with lens radius </figcaption>
+							<img src="images/part4_lucy_ti_a2.png" width="100%"/>
+							<figcaption><code>sky/CBlucy_ti.dae</code> with lens radius 0.035</figcaption>
 						</td>
 					</tr>
 					<tr>
 						<td style="text-align: center;">
-							<img src="images/part4_lucy_ti_a2.png" width="100%"/>
-							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> with lens radius </figcaption>
+							<img src="images/part4_lucy_ti_a1.png" width="100%"/>
+							<figcaption><code>sky/CBlucy_ti.dae</code> with lens radius 0.01</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_lucy_ti_a3.png" width="100%"/>
-							<figcaption>Titanium <code>sky/CBlucy_ti.dae</code> with lens radius </figcaption>
+							<img src="images/part4_lucy_ti_a0.png" width="100%"/>
+							<figcaption><code>sky/CBlucy_ti.dae</code> with lens radius 0.001</figcaption>
 						</td>
 					</tr>
 				</table>
