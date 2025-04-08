@@ -32,55 +32,144 @@
 
 		<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-z_hello_world/hw4/index.html">https://cal-cs184-student.github.io/hw-webpages-z_hello_world/hw4/index.html</a>
 
 		<br>
 
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to GitHub repository: <a href="https://github.com/cal-cs184-student/sp25-hw4-physics_is_fun">https://github.com/cal-cs184-student/sp25-hw4-physics_is_fun</a>
 
 		<figure>
-			<img src="clothsim.png" alt="Cloth draped over sphere" style="width:70%"/>
+			<img src="cover2.png" style="width:40%"/>
+		</figure>
+
+		<!--
+		<figure>
+			<img src="cover.png" alt="Cloth draped over sphere" style="width:70%"/>
 			<figcaption>You can add images with captions!</figcaption>
 		</figure>
+		-->
 
 		<!--
 		We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
 		-->
 
 		<h2>Overview</h2>
+		TODO!
 		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
 		<h2>Part 1: Masses and springs</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+		The following images show the spring constraints using white lines. The structural and bending constraints are aligned, so the difference is not visible. The shear constraints go along every adjacent diagonal.
+
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="images/part1/no_shear.png" width="100%"/>
+				  <figcaption>No Shear Constraints</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="images/part1/only_shear.png" width="100%"/>
+				  <figcaption>Only Shear Constraints</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="images/part1/all.png" width="100%"/>
+				  <figcaption>All Constraints</figcaption>
 				</td>
 			  </tr>
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="images/part1/no_shear2.png" width="100%"/>
+				  <figcaption>No Shear Constraints</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="images/part1/only_shear2.png" width="100%"/>
+				  <figcaption>Only Shear Constraints</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="images/part1/all2.png" width="100%"/>
+				  <figcaption>All Constraints</figcaption>
 				</td>
 			  </tr>
 			</table>
 		</div>
 
 		<h2>Part 2: Simulation via numerical integration</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<ul>
+			<li>
+				The spring constant seemed to change the stiffness of the cloth. It tended to resist bending more.<br>
+
+				The cloth looks thinner and falls in a more fluid way when the spring constant is small.
+				When the spring constant is large, the fabric looks thicker and more rigid. As it falls, it does not bend as much as with lower \(k_s\).<br>
+				<br>
+				The following images show that the spring constant has the inverse effect as the density:<br>
+				This makes sense because the final acceleration ends up being calculated as being \(x+g\) where \(x\) is proportional to \(\frac{k_s}{\text{mass}}\).
+
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part2/dens_075.png" width="100%"/>
+								<figcaption>\(\text{density}=0.75\text{ g/cm}^2\)<br>\(k_s=5000\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part2/default_2.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=5000\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part2/dens_150.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=5000\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part2/dens_1500.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=5000\text{ N/m}\)</figcaption>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part2/stiff_100k.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=100000\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part2/default_2.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=5000\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part2/stiff_500.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=500\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part2/stiff_50.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=50\text{ N/m}\)</figcaption>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<br>
+				I found that damping did not tend to change the final state of the fabric. It just changed how quickly it moved to the result. This included gravity.<br>
+				It also reduced any jittering when the spring constant was set too low.
+				<br>
+				Overall, I found that lower \(k_s\) or higher densty tended to make the number of folds in the cloth greater while making the rest of it flat.<br>
+				Higher \(k_s\) or lower density made the fabric have much fewer folds at the top. It also kept more of a plane shape and did not bend outwards at the bottom.
+
+			</li>
+			<li>
+				The folowing images show the cloth with all four corners pinned at default settings:
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part2/4_wire.png" width="100%"/>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part2/4_normal.png" width="100%"/>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</li>
+		</ul>
+
 
 		<h2>Part 3: Handling collisions with other objects</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
