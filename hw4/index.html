@@ -54,11 +54,17 @@
 		-->
 
 		<h2>Overview</h2>
-		TODO!
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+		In this homework, I implemented a cloth simulation with self collisions and materials for rendering it nicely. The cloth is able to collide with infinite planes and spheres.
+		I've never done physical simulation like this, and I learned a lot about how this type of thing is implemented.
+		I previously always assumed physical simulation just discretely accumulated position according to velocity and velocity according to acceleration, but now know that there are much better and more stable methods.
 
 		<h2>Part 1: Masses and springs</h2>
 
+		To build the cloth, I start by placing the masses in a grid pattern. To make the cloth a consistent size, for each axis, I multiply the axis coordinate by the size and divide by the number of massses along that axis.<br>
+		To make the springs, I start by adding just adjacent springs in the grid. This forms the structural constraints.<br>
+		Then I add springs along the diagonals to constrain sheer.<br>
+		Finally, I add springs between the first and last point mass for every axis-aligned adjacent trio of masses. This forms the bending constraints.<br>
+		<br>
 		The following images show the spring constraints using white lines. The structural and bending constraints are aligned, so the difference is not visible. The shear constraints go along every adjacent diagonal.
 
 		<div style="display: flex; flex-direction: column; align-items: center;">
@@ -97,6 +103,31 @@
 		<h2>Part 2: Simulation via numerical integration</h2>
 		<ul>
 			<li>
+				To implement the basic cloth simulation, I start by iterating through every point mass. For each mass, I set the force to the mass times gravity.<br>
+				Then I iterate through every spring and calculate the force pulling the masses together. I add the force to each mass (pointing to the other).<br>
+				Now that the forces are calculated, I perform Verlet integration on each point mass.
+				This uses the difference in positions to find the velocity. The force and mass are used to find acceleration. Then the new position is calculated in terms of the time step. (the velocity found already includes this, so it doesn't get scaled)<br>
+				The old position is stored for later use (collisions, velocity in next time step).<br>
+				<br>
+				Next I constrain the springs as follows:<br>
+				When one spring is fixed, I update the position of the other to be within 10% of the resting length and still have the same direction between them.<br>
+				When neither spring is fixed, I find the center point between them and update them to each be half of the max strech length from the center.
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part2/constraint.png" width="40%"/>
+								<figcaption>Plot Showing the Local Constraint Update (for neither fixed)<br>
+									(<a href="https://www.desmos.com/3d/ybdr24yy1v">link to interactive plot</a>)</figcaption>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<br>
+			</li>
+			<li>
+				Results:
+				<br>
 				The spring constant seemed to change the stiffness of the cloth. It tended to resist bending more.<br>
 
 				The cloth looks thinner and falls in a more fluid way when the spring constant is small.
@@ -172,27 +203,308 @@
 
 
 		<h2>Part 3: Handling collisions with other objects</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Part 4: Handling self-collisions</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Part 5: Shaders</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>(Optional) Part 6: Extra Credit - Additional cloth simulation features!</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-		
-		<h2>Additional Notes (please remove)</h2>
 		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
+			<li>
+				To implement collisions, I started by updating the simulation to run a function for each point mass and each collision object. The function is defined for each object such that it can alter the point masses behavior to implement collision.<br>
+				<br>
+				The sphere collision just checked if each point mass was inside the sphere and altered the final position of the point mass. It did this by finding a correction vector needed to move from the last position to the new position projected onto the surface.<br>
+				This correction vector was then scaled down by one minus a <code>friction</code> constant.<br>
+				To find the correction vector, I found the direction between the position and the sphere origin. Then I found the position that is the radius away from the sphere origin. Then I took difference between the last position of the point mass and the surface of the sphere.<br>
+				<br>
+				The plane intersection was more difficult because it had to check if the point mass moved from one side to the other. It did a very similar operation where it found a correction vector (scaled down by <code>1-friction</code>).<br>
+				To find the correction vector, I did a ray-plane intersection starting from the previous position towards the new position. Then took the difference between the collision point and the previous position.
+			</li>
+			<br>
+			<li>
+				In the following images, the spring constant is varied to produce different simulation results when colliding with a sphere.<br>
+				In the most flexible run, the cloth drapes around the sphere and conforms very closely to the shape. In the middle run, the cloth has some resistance to bending and forms cylindrical folds.<br>
+				In the most rigid case, the cloth does nor conform to the surface very closely at all. It creates large smooth folds and sticks out further from the sphere.
+
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part3/ks500.png" width="100%"/>
+								<figcaption>\(k_s=500\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part3/ks5000.png" width="100%"/>
+								<figcaption>\(k_s=5000\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part3/ks50000.png" width="100%"/>
+								<figcaption>\(k_s=50000\text{ N/m}\)</figcaption>
+							</td>
+						</tr>
+					</table>
+				</div>
+
+			</li>
+			<li>
+				The following simulation tested whether the plane collisions were working correctly.
+
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part3/resting_plane.png" width="50%"/>
+								<figcaption>Cloth Resting on Flat Plane</figcaption>
+							</td>
+						</tr>
+					</table>
+				</div>
 			</li>
 		</ul>
+
+		<h2>Part 4: Handling self-collisions</h2>
+		<ul>
+			<li>
+				To implement self-collisions, I had the simulation check for spherical collisions between point masses as if each mass was a sphere of radius <code>2*thickness</code>.<br>
+				It used a similar approach to the other collisions. If a given point mass was too close to another, it would find the correction vector needed to move it such that the spheres were no longer colliding.<br>
+				It would use the average of all the collision correction vectors and slightly adjust the point mass away from the others (specifically it would move the point mass by the average divided by the number of simulation steps per frame).<br>
+				<br>
+				In order to make the simulation run fast, I also implemented a spacial structure for looking up the positions of nearby point masses. It was a hash map that took a floating point number and returned a list of all the point masses near a grid cell related to the key.<br>
+				Then to find nearby point masses, each mass can look up the respective list in the map.<br>
+				The specific hash I implemented broke space into cells of dimensions \(\left<\frac{3w}{N_w},\frac{3h}{N_h},\min{\left(\frac{3w}{N_w},\frac{3h}{N_h}\right)}\right>\).<br>
+				Then it found integer coordinates according to the cell that the mass was in. (I used integer math to prevent floating point rounding from creating multiple bins for one cell).<br>
+				I then cast the integers back to floats and used a formula similar to a 3 dimensional index calculation to get a unique float for every cell within a volume (points outside of this volume could start to repeat, but the cloth was well within bounds).
+			</li>
+			<br>
+			<li>
+				The following images compare different cloth constants in simulations that exhibit self collisions:<br>
+				It appears that the spring constant and mass have the same inverse effect as found by part 2 (comparing the third and fourth rows in the below images).<br>
+				A higher spring constant makes the cloth appear much thicker or more rigid like sail fabric. A lower spring constant makes the cloth look like silk.<br>
+				The mass of the cloth has the exact inverse (under multiplication) effect. Lower mass makes the cloth look thicker. Higher mass makes it look like silk.<br>
+				<br>
+
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part4/A_15_50.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=50\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part4/B_15_50.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=50\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part4/C_15_50.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=50\text{ N/m}\)</figcaption>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part4/A_15_5000.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=5000\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part4/B_15_5000.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=5000\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part4/C_15_5000.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=5000\text{ N/m}\)</figcaption>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part4/A_15_50000.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=50000\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part4/B_15_50000.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=50000\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part4/C_15_50000.png" width="100%"/>
+								<figcaption>\(\text{density}=15\text{ g/cm}^2\)<br>\(k_s=50000\text{ N/m}\)</figcaption>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part4/A_1p5_5000.png" width="100%"/>
+								<figcaption>\(\text{density}=1.5\text{ g/cm}^2\)<br>\(k_s=5000\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part4/B_1p5_5000.png" width="100%"/>
+								<figcaption>\(\text{density}=1.5\text{ g/cm}^2\)<br>\(k_s=5000\text{ N/m}\)</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part4/C_1p5_5000.png" width="100%"/>
+								<figcaption>\(\text{density}=1.5\text{ g/cm}^2\)<br>\(k_s=5000\text{ N/m}\)</figcaption>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</li>
+		</ul>
+
+		<h2>Part 5: Shaders</h2>
+		<ul>
+			<li>
+				Shader programs are programs that run on the GPU. The two types of shaders I used were vertex and fragment shaders.<br>
+				Vertex shaders take vertices from the input assembler and typically transform them from model space to screen space.
+				They also provide the values to be interpolated across each fragment (Like UV's, per vertex normals, per vertex colors).<br>
+				The fragment shader is run for each fragment (in this case for each pixel). It takes in the interpolated values from the vertex shader output and uses them to do lighting calculations.
+				The interpolated values it uses can include things like the world space position, the surface normal (and tangent), and the surface texture coordinate.
+			</li>
+			<li>
+				The Blinn-Phong shading model consists of three parts.
+				<ul>
+					<li>
+						Ambient lighting which is supposed to mimick indirect lighting from the scene. If it didn't have this, points in shadow would be completely black.
+					</li>
+					<li>
+						Diffuse lighting which models a surface that emits the incoming radiance equally in every direction. This component is a "perfectly diffuse surface".
+					</li>
+					<li>
+						Specular lighting which models a sheen on the surface of the model. This component uses a qualitatively similar formula to match shiny materials and provides a parameter for tuning the sheen.
+					</li>
+				</ul>
+				This lighting model typically creates very plastic-like materials.<br>
+
+				<br>
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part5/bp_ambient.png" width="100%"/>
+								<figcaption>Blinn-Phong Ambient Lighting Only</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part5/bp_diffuse.png" width="100%"/>
+								<figcaption>Blinn-Phong Diffuse Lighting Only</figcaption>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part5/bp_specular.png" width="100%"/>
+								<figcaption>Blinn-Phong Specular Lighting Only</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part5/bp_sum.png" width="100%"/>
+								<figcaption>Final Blinn-Phong Lighting</figcaption>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</li>
+			<br>
+			<li>
+				Texture mapping:
+				I decided to combine the Blinn-Phong lighting with the texture mapping to get a nicer looking material than flat lookup.
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part5/texture_mapping.png" width="50%"/>
+								<figcaption>Texture From <a href="https://ambientcg.com/view?id=Fabric015">ambientcg.com</a></figcaption>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</li>
+			<br>
+			<li>
+				Bump and displacement mapping:
+				Bump mapping seems to be the most universal. It does not require a high resolution mesh to look good.<br>
+				However, when the mesh is high enough resolution, the displacement mapping provides a much more detailed surface appearance.<br>
+				(Height Map From <a href="https://ambientcg.com/view?id=Fabric015">ambientcg.com</a>)<br>
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part5/bump_sphere.png" width="100%"/>
+								<figcaption>Bump Mapping</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part5/disp_sphere.png" width="100%"/>
+								<figcaption>Displacement Mapping</figcaption>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part5/bump_cloth.png" width="100%"/>
+								<figcaption>Bump Mapping</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part5/disp_cloth.png" width="100%"/>
+								<figcaption>Displacement Mapping</figcaption>
+							</td>
+						</tr>
+					</table>
+				</div>
+
+				Comparison of different resolutions for each method:
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part5/bump_16.png" width="100%"/>
+								<figcaption>Bump Mapping at Mesh Resolution 16x16</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part5/bump_128.png" width="100%"/>
+								<figcaption>Bump Mapping at Mesh Resolution 128x128</figcaption>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part5/disp_16.png" width="100%"/>
+								<figcaption>Displacement Mapping at Mesh Resolution 16x16</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part5/disp_128.png" width="100%"/>
+								<figcaption>Displacement Mapping at Mesh Resolution 128x128</figcaption>
+							</td>
+						</tr>
+					</table>
+				</div>
+				The difference between the resolutions when bump mapping is barely noticable. However, with displacement mapping, the lower resolution one appears very lumpy and not at all how it's supposed to look.
+			</li>
+			<br>
+			<li>
+				Mirror Material:
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part5/mirror_sphere.png" width="100%"/>
+								<figcaption>Mirror Material on the Sphere</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part5/mirror_cloth.png" width="100%"/>
+								<figcaption>Mirror Material on the Cloth</figcaption>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</li>
+			<br>
+			<li>
+				Custom Material (Combine all 5):
+				The following material combines texture mapping with Blinn-Phong lighting. It also adds a clear coat reflection according to the environment map (slight mirror surface).
+				It also implements bump mapped normals and vertex displacement.
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/part5/custom_sphere.png" width="100%"/>
+								<figcaption>Mirror Material on the Sphere</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/part5/custom_cloth.png" width="100%"/>
+								<figcaption>Mirror Material on the Cloth</figcaption>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</li>
+		</ul>
+
+		<h2>(Optional) Part 6: Extra Credit - Additional cloth simulation features!</h2>
+
 		</div>
 	</body>
 </html>
